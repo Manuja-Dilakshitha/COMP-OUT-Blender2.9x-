@@ -1,3 +1,14 @@
+bl_info = {
+    "name": "COMP OUT - Individual Folder Version",
+    "author": "Manuja Dilaksitha @ Thina Entertainment",
+    "version": (2, 0),
+    "blender": (2, 93),
+    "description": "Set compositor nodes and generate related folder paths",
+    "warning": "Clicking GENERATE buton multiple times creates multiple nodes and will override currently saved fiels!!!",
+    "doc_url": "",
+    "tracker_url": "",
+}
+
 import bpy
 
 from bpy.types import Operator
@@ -119,12 +130,19 @@ class HelloWorldPanel(bpy.types.Panel):
         layout = self.layout
 
         obj = context.object
+        
+        row = layout.row()
+        row.label(text="Select Output Folder :")
+        
+        row = layout.row()
+        row.prop(scene, "my_string_prop")
+        
+        row = layout.row()
+        row.label(text="____________________")
 
         row = layout.row()
         row.label(text="Select Passes", icon='RENDERLAYERS')
 
-        row = layout.row()
-        row.label(text="Active object is: " + obj.name)
         
         
         ################  <RENDER PASSES CHECKBOXES>  ###################
@@ -216,15 +234,14 @@ class HelloWorldPanel(bpy.types.Panel):
         
         row = layout.row()
         row.operator("compositorfilepaths.generate")
+                
+        
+        row = layout.row()
+        row.label(text = "")
         
         
-        if (bpy.props):
-            row = layout.row()
-            row.label(text = "Image is enabled")
-        
-        
-        
-        
+        row = layout.row()
+        row.label(text = "THINA ENTERTAINMENT", icon="GREASEPENCIL")
         
         
 
@@ -312,7 +329,7 @@ class create(bpy.types.Operator):
 
         for layer in layer_outputs:
             output_file = nodes.new("CompositorNodeOutputFile")
-            output_file.base_path = ("D:/Manuja/Blender Addons/CREATED/Set Compositor nodes/test/" + layer)
+            output_file.base_path = (context.scene.my_string_prop + "/" + layer)
             scene.node_tree.links.new(render_layers.outputs[layer], output_file.inputs['Image'])
             
             
@@ -323,12 +340,26 @@ class create(bpy.types.Operator):
         
 
 def register():
+    bpy.types.Scene.my_string_prop = bpy.props.StringProperty \
+    (
+      name = "Output folder",
+      description = "Select Output Folder",
+      default = "Desktop/Render/"
+    )
+    
     bpy.utils.register_class(HelloWorldPanel)
     bpy.utils.register_class(create)
     
 
 
 def unregister():
+    bpy.utils.unregister_class(HelloWorldPanel)
+    bpy.utils.register_class(create)
+
+
+if __name__ == "__main__":
+    register()
+
     bpy.utils.unregister_class(HelloWorldPanel)
     bpy.utils.register_class(create)
 
